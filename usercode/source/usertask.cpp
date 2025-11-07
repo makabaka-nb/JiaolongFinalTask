@@ -5,8 +5,8 @@
 uint32_t send=0;
 uint32_t recv=0;
 
-osMessageQueueId_t test_queue_handle;
-osMessageQueueAttr_t test_queue_atrributes ={.name="test_queue"};
+osSemaphoreAttr_t test_semaphore_attributes = {.name = "test_semaphore"};
+osSemaphoreId_t test_semaphore_handle;
 
 
 osThreadId_t testTaskHandle;
@@ -19,8 +19,9 @@ constexpr osThreadAttr_t testTask_attributes = {
 [[noreturn]] void test_task(void *) {
     while (true) {
         const auto tick=osKernelGetTickCount();
-        send+=1;
-        osMessageQueuePut(test_queue_handle,&send,0,0);
+        if (send++%5==0) {
+            osSemaphoreRelease(test_semaphore_handle);
+        }
         osDelayUntil(tick+1);
     }
 }
@@ -34,12 +35,13 @@ constexpr osThreadAttr_t test1Task_attributes = {
 
 [[noreturn]] void test1_task(void *) {
     while (true) {
-        osMessageQueueGet(test_queue_handle,&recv,0,0);
+        osSemaphoreAcquire(test_semaphore_handle,osWaitForever);
+        recv++;
     }
 }
 
 void user_tasks_init() {
-    test_queue_handle = osMessageQueueNew(10,sizeof(uint32_t),&test_queue_atrributes);
+    test_semaphore_handle = osSemaphoreNew(1,0,&test_semaphore_attributes);
     testTaskHandle=osThreadNew(test_task,nullptr,&testTask_attributes);
     test1TaskHandle=osThreadNew(test1_task,nullptr,&test1Task_attributes);
 
