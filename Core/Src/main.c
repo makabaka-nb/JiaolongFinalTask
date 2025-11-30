@@ -48,7 +48,17 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+CAN_FilterTypeDef can_filter = {
+  .FilterIdHigh = 0x0000,
+  .FilterIdLow = 0x0000,
+  .FilterMaskIdHigh = 0x0000,
+  .FilterMaskIdLow = 0x0000,
+  .FilterFIFOAssignment = CAN_FILTER_FIFO0,
+  .FilterBank = 0,
+  .FilterMode = CAN_FILTERMODE_IDMASK,
+  .FilterScale = CAN_FILTERSCALE_32BIT,
+  .FilterActivation = ENABLE,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,7 +107,15 @@ int main(void)
   MX_SPI1_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  if (HAL_CAN_ConfigFilter(&hcan1,&can_filter)!=HAL_OK) {
+    Error_Handler();
+  }
+  if (HAL_CAN_Start(&hcan1)!=HAL_OK) {
+    Error_Handler();
+  }
+  if (HAL_CAN_ActivateNotification(&hcan1,CAN_IT_RX_FIFO0_MSG_PENDING)!=HAL_OK) {
+    Error_Handler();
+  }
   /* USER CODE END 2 */
 
   /* Init scheduler */

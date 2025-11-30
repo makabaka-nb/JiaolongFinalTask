@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-    void user_task_init();
+    void User_Tasks_Init();
 
 
 #ifdef __cplusplus
